@@ -2,8 +2,9 @@
 
 #include <vector>
 #include <algorithm>
+#include <cassert>
 
-// Algorithms for counting the number of string range matches.
+// Algorithm for counting the number of string range matches.
 
 namespace srm {
 
@@ -13,18 +14,23 @@ namespace srm {
 /// The characters should be comparable with operators < and ==.
 /// Integer type Idx should be large enough to hold the sizes of strings
 /// X and Y times the parameter k given in constructor.
+///
+/// The algorithm used is the "Linear time and Logarithmic Extra Space"
+/// algorithm described in:
+/// J. Kärkkäinen, D. Kempa, S. Puglisi: String Range Matching. 2014.
 template <typename YI, typename Idx = std::size_t>
 class LessThanCounter {
 public:
 	/// Construct the workspace for Y given by random-access iterator range
 	/// [y_begin, y_end).
-	/// Parameter k >= 3 is the parameter for the algorithm described in TODO: source.
+	/// Parameter k >= 3 is the parameter for the algorithm described in the
+	/// paper.
 	LessThanCounter(YI y_begin, YI y_end, Idx k = 3)
 		: y_begin(y_begin),
 		  y_end(y_end),
 		  k(k)
 	{
-		/// TODO: k validity checking?
+		assert(k >= 3);
 		
 		// Convenience function to index Y.
 		auto Y = [y_begin](Idx i) { return *(y_begin + i); };
@@ -168,7 +174,7 @@ LessThanCounter<YI, Idx> makeLessThanCounter(YI y_begin, YI y_end, Idx k = 3) {
 }
 
 /// Workspace for counting the number of suffices of string X that are
-/// lexicographically between the constant string Y and Z, i.e. in range [Y, Z).
+/// lexicographically between the constant strings Y and Z, i.e. in range [Y, Z).
 /// Strings Y and Z must stay constant throughout the lifetime of the workspace.
 /// Y is assumed to be lexicographically less than or equal to Z.
 /// The characters should be comparable with operators < and ==.
@@ -179,7 +185,8 @@ class RangeCounter {
 public:
 	/// Construct the workspace for Y and Z given by random-access iterator ranges
 	/// [y_begin, y_end) and [z_begin, z_end[.
-	/// Parameters ky, kz >= 3 are the parameters for the algorithm described in TODO: source,
+	/// Parameters ky, kz >= 3 are the parameters for the algorithm described in
+	/// the paper.
 	/// ky is used for bound Y and kz for bound Z.
 	RangeCounter(
 		YI y_begin, YI y_end,
