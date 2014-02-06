@@ -3,6 +3,9 @@
 #include "util.hpp"
 
 #include <algorithm>
+#include <vector>
+#include <iostream>
+#include <cassert>
 
 // Algorithm for creating lookup table of string range matches.
 
@@ -14,9 +17,9 @@ namespace srm {
 /// and [y_begin, y_end). The output is a bitvector of the same length as X,
 /// and it is written in order using the supplied functions write_output and
 /// copy_output, where:
-///  - write_output(bool val) sets the next value to val.
-///  - copy_output(Idx j, Idx s) sets the next values as copies from already
-///    written range [j, j + s).
+///  - set_output(Idx i, bool val) sets the value at i to val
+///  - copy_output(Idx i, Idx j, Idx s) copies the values from [j, j + s),
+///    to [i, i + s). The ranges are guaranteed to be disjoint.
 /// It is guaranteed that all values will be filled explicitly.
 ///
 /// The characters should be comparable with operators < and ==.
@@ -25,11 +28,15 @@ namespace srm {
 /// The algorithm used is the "Linear Time and Constant Extra Space, Copying Output"
 /// algorithm described in:
 /// J. Kärkkäinen, D. Kempa, S. Puglisi: String Range Matching. 2014.
-template <typename XI, typename YI, typename F1, typename F2, typename Idx = std::size_t>
+template <
+	typename XI, typename YI,
+	typename F1, typename F2,
+	typename Idx = std::size_t
+>
 void computeLessThanMatchTable(
 	XI x_begin, XI x_end,
 	YI y_begin, YI y_end,
-	F1& write_output, F2& copy_output
+	F1& set_output, F2& copy_output
 ) {
 	// Convenience functions to index X and Y.
 	auto X = [x_begin](Idx i) { return *(x_begin + i); };
@@ -46,7 +53,7 @@ void computeLessThanMatchTable(
 		while(i + ms.l < n && ms.l < m && X(i + ms.l) == Y(ms.l)) {
 			ms = updateMS(y_begin, ms);
 		}
-		write_output(ms.l < m && (i + ms.l == n || X(i + ms.l) < Y(ms.l)));
+		set_output(i, ms.l < m && (i + ms.l == n || X(i + ms.l) < Y(ms.l)));
 		Idx j = i_max;
 		if(ms.l > ms_max.l) {
 			std::swap(ms, ms_max);
@@ -57,12 +64,12 @@ void computeLessThanMatchTable(
 			ms.p <= ms.l / 3 &&
 			std::equal(y_begin, y_begin + ms.s, y_begin + ms.p)
 		) {
-			copy_output(j + 1, ms.p - 1);
+			copy_output(i + 1, j + 1, ms.p - 1);
 			i += ms.p;
 			ms.l -= ms.p;
 		} else {
 			Idx h = ms.l / 3 + 1;
-			copy_output(j + 1, h - 1);
+			copy_output(i + 1, j + 1, h - 1);
 			i += h;
 			ms = MSTuple<Idx>{0, 0, 0};
 		}
@@ -74,25 +81,84 @@ void computeLessThanMatchTable(
 /// std::copy for copying ranges. See computeLessThanMatchTable for description
 /// of other parameters.
 template <typename XI, typename YI, typename BI, typename Idx = std::size_t>
-void computeLessThanMatchTableToRange(
+void computeLessThanMatchTableToIterator(
 	XI x_begin, XI x_end,
 	YI y_begin, YI y_end,
 	BI b_begin
 ) {
-	BI bi = b_begin;
-	auto write_output = [&bi](bool val) {
-		*bi = val;
-		++bi;
+	auto set_output = [b_begin](Idx i, bool val) {
+		*(b_begin + i) = val;
 	};
-	auto copy_output = [&bi, b_begin](Idx j, Idx s) {
-		std::copy(b_begin + j, b_begin + j + s, bi);
-		bi += s;
+	auto copy_output = [b_begin](Idx i, Idx j, Idx s) {
+		std::copy(b_begin + j, b_begin + j + s, b_begin + i);
 	};
 	computeLessThanMatchTable(
 		x_begin, x_end,
 		y_begin, y_end,
-		write_output, copy_output
+		set_output, copy_output
 	);
+}
+
+/// Same as computeLessThanMatchTable, but instead of computing suffices of
+/// X lexicographically less than Y, computes the lookup table for suffices
+/// lexicographically in range [Y, Z). String Z is given as random-access
+/// iterator range [z_begin, z_end).
+///
+/// Compared to computeLessThanMatchTable, a new function is required:
+///  - xor_output(Idx i, bool val) xors value at i with val.
+///
+/// String Y is assumed to be lexicographically less than or equal to string Z.
+/// See the documentation of computeLessThanMatchTable for more details.
+template <
+	typename XI, typename YI, typename ZI,
+	typename F1, typename F2, typename F3,
+	typename Idx = std::size_t
+>
+void computeRangeMatchTable(
+	XI x_begin, XI x_end,
+	YI y_begin, YI y_end,
+	ZI z_begin, ZI z_end,
+	F1& set_output, F2& copy_output, F3& xor_output
+) {
+	computeLessThanMatchTable(
+		x_begin, x_end,
+		z_begin, z_end,
+		set_output, copy_output
+	);
+	computeLessThanMatchTable(
+		x_begin, x_end,
+		y_begin, y_end,
+		xor_output, copy_output
+	);
+}
+
+/// Compute the same boolean vector as computeRangeMatchTable to random-access
+/// iterator range [b_begin, b_begin + n) where n is the length of string X. Uses
+/// std::copy for copying ranges. See computeRangeMatchTable for description
+/// of other parameters.
+template <
+	typename XI, typename YI, typename ZI,
+	typename BI,
+	typename Idx = std::size_t
+>
+void computeRangeMatchTableToIterator(
+	XI x_begin, XI x_end,
+	YI y_begin, YI y_end,
+	ZI z_begin, YI z_end,
+	BI b_begin
+) {
+	// TODO: use constant extra space?
+	Idx n = (Idx)(x_end - x_begin);
+	
+	std::vector<char> a(n);
+	std::vector<char> b(n);
+	
+	computeLessThanMatchTableToIterator(x_begin, x_end, y_begin, y_end, a.begin());
+	computeLessThanMatchTableToIterator(x_begin, x_end, z_begin, z_end, b.begin());
+	
+	for(Idx i = 0; i < n; ++i) {
+		*(b_begin + i) = a[i] != b[i];
+	}
 }
 
 }

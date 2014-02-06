@@ -147,7 +147,7 @@ private:
 		// Now 'it' contains the first Sp element with b > x.
 		if(it == Sp.begin()) return SpElement{0, 0, 0};
 		--it;
-		if(it->e <= x) return SpElement{0, 0, 0};
+		if(it->e </*=*/ x) return SpElement{0, 0, 0}; // TODO: this omission seems to fix tests but check.
 		return *it;
 	}
 	
@@ -162,6 +162,8 @@ private:
 		auto it = std::upper_bound(Sn.begin(), Sn.end(), elem, cmp);
 		
 		// Now 'it' contains the first Sp element with b > x.
+		assert(it != Sn.begin());
+		
 		--it;
 		return *it;
 	}
@@ -173,18 +175,15 @@ LessThanCounter<YI, Idx> makeLessThanCounter(YI y_begin, YI y_end, Idx k = 3) {
 	return LessThanCounter<YI, Idx>(y_begin, y_end, k);
 }
 
-/// Workspace for counting the number of suffices of string X that are
-/// lexicographically between the constant strings Y and Z, i.e. in range [Y, Z).
-/// Strings Y and Z must stay constant throughout the lifetime of the workspace.
-/// Y is assumed to be lexicographically less than or equal to Z.
-/// The characters should be comparable with operators < and ==.
-/// Integer type Idx should be large enough to hold the sizes of strings
-/// X, Y and Z times the parameter k given in constructor.
+/// Same as LessThanCounter, but instead of counting the suffices of X less
+/// less than Y, computes the suffices of X in range [Y, Z). Y is assumed to
+/// be lexicographically less than or equal to Z.
+/// See the documentation of LessThanCounter for more details.
 template <typename YI, typename ZI, typename Idx = std::size_t>
 class RangeCounter {
 public:
 	/// Construct the workspace for Y and Z given by random-access iterator ranges
-	/// [y_begin, y_end) and [z_begin, z_end[.
+	/// [y_begin, y_end) and [z_begin, z_end).
 	/// Parameters ky, kz >= 3 are the parameters for the algorithm described in
 	/// the paper.
 	/// ky is used for bound Y and kz for bound Z.
