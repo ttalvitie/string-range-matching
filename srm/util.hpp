@@ -14,8 +14,8 @@ struct MSTuple {
 	Idx p; ///< Period of the maximal suffix of Y[0, l).
 };
 
-/// For string Y given by random-access iterator range starting from y_begin and
-/// a corresponding MS tuple ms, find the MS tuple with l increased by one.
+/// For string Y given by zero-indexed character access function Y and a
+/// corresponding MS tuple ms, find the MS tuple with l increased by one.
 /// It is assumed that l is less than the length of Y.
 /// The characters should be comparable with operators < and ==.
 /// Idx should be sufficient to hold the length of string Y.
@@ -26,12 +26,9 @@ struct MSTuple {
 /// Czech Technical university, 2013.
 ///
 /// The algorithm runs in O(change in s) time.
-template <typename YI, typename Idx>
-MSTuple<Idx> updateMS(YI y_begin, MSTuple<Idx> ms) {
+template <typename F, typename Idx>
+MSTuple<Idx> updateMS(F& Y, MSTuple<Idx> ms) {
 	if(ms.l == 0) return MSTuple<Idx>{1, 0, 1};
-	
-	// Convenience function to index Y.
-	auto Y = [y_begin](Idx i) { return *(y_begin + i); };
 	
 	Idx i = ms.l;
 	while(i <= ms.l) {

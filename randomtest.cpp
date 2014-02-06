@@ -1,5 +1,6 @@
 #include "srm/table.hpp"
 #include "srm/count.hpp"
+#include "srm/crochermore.hpp"
 
 #include "testutil.hpp"
 
@@ -65,8 +66,30 @@ void randomTestRangeMatch() {
 	if(count != cmpcount) fail();
 }
 
+void randomTestStringPeriod() {
+	int a = rand(1, choice(3, 8, 20));
+	string X = randstring(rand(0, choice(5, 15, 30)), 'A', 'A' + a);
+	int n = X.size();
+	
+	int period;
+	for(period = 1; ; ++period) {
+		bool ok = true;
+		for(int i = 0; i + period < n; ++i) {
+			if(X[i] != X[i + period]) {
+				ok = false;
+				break;
+			}
+		}
+		if(ok) break;
+	}
+	
+	size_t cmpperiod = srm::computeStringPeriod(X.begin(), X.end());
+	if((size_t)period != cmpperiod) fail();
+}
+
 int main() {
 	while(true) {
+		randomTestStringPeriod();
 		randomTestRangeMatch();
 		randomTestLessThanMatch();
 	}

@@ -51,7 +51,7 @@ void computeLessThanMatchTable(
 	
 	while(i < n) {
 		while(i + ms.l < n && ms.l < m && X(i + ms.l) == Y(ms.l)) {
-			ms = updateMS(y_begin, ms);
+			ms = updateMS(Y, ms);
 		}
 		set_output(i, ms.l < m && (i + ms.l == n || X(i + ms.l) < Y(ms.l)));
 		Idx j = i_max;
@@ -92,7 +92,7 @@ void computeLessThanMatchTableToIterator(
 	auto copy_output = [b_begin](Idx i, Idx j, Idx s) {
 		std::copy(b_begin + j, b_begin + j + s, b_begin + i);
 	};
-	computeLessThanMatchTable(
+	computeLessThanMatchTable<XI, YI, decltype(set_output), decltype(copy_output), Idx>(
 		x_begin, x_end,
 		y_begin, y_end,
 		set_output, copy_output
@@ -109,7 +109,7 @@ void computeLessThanMatchTableToIterator(
 ///
 /// String Y is assumed to be lexicographically less than or equal to string Z.
 /// See the documentation of computeLessThanMatchTable for more details.
-template <
+/*template <
 	typename XI, typename YI, typename ZI,
 	typename F1, typename F2, typename F3,
 	typename Idx = std::size_t
@@ -131,7 +131,7 @@ void computeRangeMatchTable(
 		xor_output, copy_output
 	);
 }
-
+*/
 /// Compute the same boolean vector as computeRangeMatchTable to random-access
 /// iterator range [b_begin, b_begin + n) where n is the length of string X. Uses
 /// std::copy for copying ranges. See computeRangeMatchTable for description
@@ -153,8 +153,12 @@ void computeRangeMatchTableToIterator(
 	std::vector<char> a(n);
 	std::vector<char> b(n);
 	
-	computeLessThanMatchTableToIterator(x_begin, x_end, y_begin, y_end, a.begin());
-	computeLessThanMatchTableToIterator(x_begin, x_end, z_begin, z_end, b.begin());
+	computeLessThanMatchTableToIterator<XI, YI, std::vector<char>::iterator, Idx>(
+		x_begin, x_end, y_begin, y_end, a.begin()
+	);
+	computeLessThanMatchTableToIterator<XI, ZI, std::vector<char>::iterator, Idx>(
+		x_begin, x_end, z_begin, z_end, b.begin()
+	);
 	
 	for(Idx i = 0; i < n; ++i) {
 		*(b_begin + i) = a[i] != b[i];
