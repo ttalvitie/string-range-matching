@@ -11,7 +11,7 @@
 using namespace std;
 
 void randomTestLessThanMatch() {
-	int a = rand(1, choice(3, 8, 20));
+	int a = rand(0, choice(3, 8, 20));
 	string X = randstring(rand(0, choice(5, 15)), 'A', 'A' + a);
 	string Y = randstring(rand(0, choice(5, 15)), 'A', 'A' + a);
 	
@@ -37,7 +37,7 @@ void randomTestLessThanMatch() {
 }
 
 void randomTestRangeMatch() {
-	int a = rand(1, choice(3, 8, 20));
+	int a = rand(0, choice(3, 8, 20));
 	string X = randstring(rand(0, choice(5, 15)), 'A', 'A' + a);
 	string Y = randstring(rand(0, choice(5, 15)), 'A', 'A' + a);
 	string Z = randstring(rand(0, choice(5, 15)), 'A', 'A' + a);
@@ -67,7 +67,7 @@ void randomTestRangeMatch() {
 }
 
 void randomTestStringPeriod() {
-	int a = rand(1, choice(3, 8, 20));
+	int a = rand(0, choice(3, 8, 20));
 	string X = randstring(rand(0, choice(5, 15, 30)), 'A', 'A' + a);
 	int n = X.size();
 	
@@ -87,11 +87,51 @@ void randomTestStringPeriod() {
 	if((size_t)period != cmpperiod) fail();
 }
 
+void randomTestExactStringMatching() {
+	int a = rand(0, choice(3, 8, 20));
+	string P = randstring(rand(0, choice(5, 15, 30)), 'A', 'A' + a);
+	
+	int prob = rand(0, choice(5, 20, 100));
+	
+	string T;
+	int len = rand(0, 500);
+	while((int)T.size() < len) {
+		if(rand(0, prob) == 0) {
+			T.append(P);
+		} else {
+			T.append(randstring(1, 'A', 'A' + a));
+		}
+	}
+	
+	vector<int> matches;
+	for(int i = 0; i + (int)P.size() <= (int)T.size(); ++i) {
+		bool match = true;
+		for(int j = 0; j < (int)P.size(); ++j) {
+			if(T[i + j] != P[j]) {
+				match = false;
+				break;
+			}
+		}
+		if(match) matches.push_back(i);
+	}
+	
+	vector<int> cmpmatches;
+	srm::reportExactStringMatches(
+		P.begin(), P.end(),
+		T.begin(), T.end(),
+		[&](int i) { cmpmatches.push_back(i); }
+	);
+	
+	if(matches.size() != cmpmatches.size()) fail();
+	if(!equal(matches.begin(), matches.end(), cmpmatches.begin())) fail();
+}
+
 int main() {
 	while(true) {
-		randomTestStringPeriod();
-		randomTestRangeMatch();
 		randomTestLessThanMatch();
+		randomTestRangeMatch();
+		randomTestStringPeriod();
+		randomTestExactStringMatching();
 	}
 	
 	return 0;

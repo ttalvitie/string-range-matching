@@ -36,7 +36,7 @@ template <
 void computeLessThanMatchTable(
 	XI x_begin, XI x_end,
 	YI y_begin, YI y_end,
-	F1& set_output, F2& copy_output
+	F1 set_output, F2 copy_output
 ) {
 	// Convenience functions to index X and Y.
 	auto X = [x_begin](Idx i) { return *(x_begin + i); };

@@ -27,7 +27,7 @@ struct MSTuple {
 ///
 /// The algorithm runs in O(change in s) time.
 template <typename F, typename Idx>
-MSTuple<Idx> updateMS(F& Y, MSTuple<Idx> ms) {
+MSTuple<Idx> updateMS(F Y, MSTuple<Idx> ms) {
 	if(ms.l == 0) return MSTuple<Idx>{1, 0, 1};
 	
 	Idx i = ms.l;
