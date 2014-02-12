@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 // Utility functions used in implementing string range matching algorithms.
 
 namespace srm {

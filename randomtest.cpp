@@ -1,6 +1,7 @@
 #include "srm/table.hpp"
 #include "srm/count.hpp"
 #include "srm/crochermore.hpp"
+#include "srm/report.hpp"
 
 #include "testutil.hpp"
 
@@ -91,7 +92,7 @@ void randomTestExactStringMatching() {
 	int a = rand(0, choice(3, 8, 20));
 	string P = randstring(rand(0, choice(5, 15, 30)), 'A', 'A' + a);
 	
-	int prob = rand(0, choice(5, 20, 100));
+	int prob = rand(1, choice(5, 20, 100));
 	
 	string T;
 	int len = rand(0, 500);
@@ -126,12 +127,49 @@ void randomTestExactStringMatching() {
 	if(!equal(matches.begin(), matches.end(), cmpmatches.begin())) fail();
 }
 
+void randomTestRestrictedRangeMatches() {
+	int a = rand(0, choice(3, 8, 20));
+	string X = randstring(rand(0, choice(5, 15, 30)), 'A', 'A' + a);
+	string Y;
+	if(X.empty() || choice(true, false)) {
+		Y = randstring(rand(1, choice(5, 15, 30)), 'A', 'A' + a);
+	} else {
+		int i = rand(0, (int)X.size() - 1);
+		Y = X.substr(i, rand(1, (int)X.size() - i));
+	}
+	int m = Y.size();
+	int r = rand(2 * m / 3, m - 1);
+	
+	string Yp = Y.substr(0, r);
+	
+	vector<int> matches;
+	for(int i = 0; i < (int)X.size(); ++i) {
+		string sub = X.substr(i);
+		if(sub >= Yp && sub < Y) {
+			matches.push_back(i);
+		}
+	}
+	
+	vector<int> cmpmatches;
+	srm::reportRestrictedRangeMatches(
+		X.begin(), X.end(),
+		Y.begin(), Y.end(), Y.begin() + r,
+		[&](int i) {
+			cmpmatches.push_back(i);
+		}
+	);
+	
+	if(matches.size() != cmpmatches.size()) fail();
+	if(!equal(matches.begin(), matches.end(), cmpmatches.begin())) fail();
+}
+
 int main() {
 	while(true) {
 		randomTestLessThanMatch();
 		randomTestRangeMatch();
 		randomTestStringPeriod();
 		randomTestExactStringMatching();
+		randomTestRestrictedRangeMatches();
 	}
 	
 	return 0;

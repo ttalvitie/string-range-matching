@@ -2,6 +2,7 @@
 
 #include "util.hpp"
 
+#include <cstddef>
 #include <algorithm>
 
 // Crochermore's algorithms for exact string match reporting and string period

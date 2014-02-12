@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <vector>
 #include <algorithm>
 #include <cassert>
@@ -8,7 +9,7 @@
 
 namespace srm {
 
-/// Workspace for counting the number of suffices of string X that are
+/// Workspace for counting the number of suffixes of string X that are
 /// lexicographically smaller than the constant string Y.
 /// String Y must stay constant throughout the lifetime of the workspace.
 /// The characters should be comparable with operators < and ==.
@@ -78,7 +79,7 @@ public:
 		}
 	}
 	
-	/// Return the count of suffices of X lexicographically smaller than Y.
+	/// Return the count of suffixes of X lexicographically smaller than Y.
 	/// String X is given by random-access iterator range [x_begin, x_end).
 	template <typename XI>
 	Idx count(XI x_begin, XI x_end) {
@@ -175,8 +176,8 @@ LessThanCounter<YI, Idx> makeLessThanCounter(YI y_begin, YI y_end, Idx k = 3) {
 	return LessThanCounter<YI, Idx>(y_begin, y_end, k);
 }
 
-/// Same as LessThanCounter, but instead of counting the suffices of X less
-/// less than Y, computes the suffices of X in range [Y, Z). Y is assumed to
+/// Same as LessThanCounter, but instead of counting the suffixes of X less
+/// less than Y, computes the suffixes of X in range [Y, Z). Y is assumed to
 /// be lexicographically less than or equal to Z.
 /// See the documentation of LessThanCounter for more details.
 template <typename YI, typename ZI, typename Idx = std::size_t>
@@ -196,7 +197,7 @@ public:
 		  z_counter(z_begin, z_end, kz)
 	{ }
 	
-	/// Return the count of suffices of X lexicographically in range [Y, Z).
+	/// Return the count of suffixes of X lexicographically in range [Y, Z).
 	/// String X is given by random-access iterator range [x_begin, x_end).
 	template <typename XI>
 	Idx count(XI x_begin, XI x_end) {
