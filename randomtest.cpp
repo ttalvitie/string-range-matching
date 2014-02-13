@@ -138,7 +138,7 @@ void randomTestRestrictedRangeMatches() {
 		Y = X.substr(i, rand(1, (int)X.size() - i));
 	}
 	int m = Y.size();
-	int r = rand(2 * m / 3, m - 1);
+	int r = rand(0, m);
 	
 	string Yp = Y.substr(0, r);
 	
@@ -159,6 +159,7 @@ void randomTestRestrictedRangeMatches() {
 		}
 	);
 	
+	sort(cmpmatches.begin(), cmpmatches.end());
 	if(matches.size() != cmpmatches.size()) fail();
 	if(!equal(matches.begin(), matches.end(), cmpmatches.begin())) fail();
 }
