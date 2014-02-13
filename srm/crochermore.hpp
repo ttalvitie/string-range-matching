@@ -24,7 +24,7 @@ namespace srm {
 template <typename XI, typename Idx = std::size_t>
 Idx computeStringPeriod(XI x_begin, XI x_end) {
 	// Convenience function to index X.
-	auto X = [x_begin](Idx i) { return *(x_begin + i); };
+	auto X = [x_begin](Idx i) -> decltype(*x_begin) { return *(x_begin + i); };
 	Idx n = (Idx)(x_end - x_begin);
 	
 	Idx per = 1;
@@ -35,7 +35,7 @@ Idx computeStringPeriod(XI x_begin, XI x_end) {
 		if(X(per + m) == X(m)) {
 			++m;
 		} else {
-			auto S = [&X, per, m](Idx pos) {
+			auto S = [&X, per, m](Idx pos) -> decltype(*x_begin) {
 				if(pos == m) return X(per + m);
 				return X(pos);
 			};
@@ -90,8 +90,8 @@ Idx computeStringPeriod(XI x_begin, XI x_end) {
 template <typename PI, typename TI, typename F, typename Idx = std::size_t>
 void reportExactStringMatches(PI p_begin, PI p_end, TI t_begin, TI t_end, F output) {
 	// Convenience functions to index P and X.
-	auto P = [p_begin](Idx i) { return *(p_begin + i); };
-	auto T = [t_begin](Idx i) { return *(t_begin + i); };
+	auto P = [p_begin](Idx i) -> decltype(*p_begin) { return *(p_begin + i); };
+	auto T = [t_begin](Idx i) -> decltype(*t_begin) { return *(t_begin + i); };
 	Idx k = (Idx)(p_end - p_begin);
 	Idx n = (Idx)(t_end - t_begin);
 	
@@ -104,7 +104,7 @@ void reportExactStringMatches(PI p_begin, PI p_end, TI t_begin, TI t_end, F outp
 		if(m == k + 1) output(pos);
 		if(pos + m == n + 1) --m;
 		
-		auto S = [&P, &T, pos, m](Idx i) {
+		auto S = [&P, &T, pos, m](Idx i) -> decltype(*p_begin) {
 			if(i == m - 1) return T(pos + m - 1);
 			return P(i);
 		};
