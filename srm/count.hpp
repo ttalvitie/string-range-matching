@@ -82,7 +82,7 @@ public:
 	/// Return the count of suffixes of X lexicographically smaller than Y.
 	/// String X is given by random-access iterator range [x_begin, x_end).
 	template <typename XI>
-	Idx count(XI x_begin, XI x_end) {
+	Idx count(XI x_begin, XI x_end) const {
 		// Convenience functions to index X and Y.
 		auto X = [x_begin](Idx i) { return *(x_begin + i); };
 		auto Y = [this](Idx i) { return *(y_begin + i); };
@@ -137,7 +137,7 @@ private:
 	
 	/// Returns the element in Sp such that b <= x < e, or if none is found,
 	/// returns {0, 0, 0}.
-	SpElement findSp(Idx x) {
+	SpElement findSp(Idx x) const {
 		// Find the element using binary search.
 		SpElement elem{x, 0, 0};
 		auto cmp = [](const SpElement& a, const SpElement& b) {
@@ -154,7 +154,7 @@ private:
 	
 	/// Returns the element in Sn such that b <= x and b is as large as
 	/// possible. Assumes that such an element exists.
-	SnElement predSn(Idx x) {
+	SnElement predSn(Idx x) const {
 		// Find the element using binary search.
 		SnElement elem{x, 0};
 		auto cmp = [](const SnElement& a, const SnElement& b) {
@@ -200,7 +200,7 @@ public:
 	/// Return the count of suffixes of X lexicographically in range [Y, Z).
 	/// String X is given by random-access iterator range [x_begin, x_end).
 	template <typename XI>
-	Idx count(XI x_begin, XI x_end) {
+	Idx count(XI x_begin, XI x_end) const {
 		return z_counter.count(x_begin, x_end) - y_counter.count(x_begin, x_end);
 	}
 	
