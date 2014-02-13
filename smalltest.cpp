@@ -126,7 +126,7 @@ int main() {
 		}
 		}
 		
-		cout << (double)done / 6534730.03 << "% done.\n";
+		cout << (double)done / 6588669.76 << "% done.\n";
 	}
 	}
 	
