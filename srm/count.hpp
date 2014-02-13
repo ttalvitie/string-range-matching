@@ -54,7 +54,7 @@ public:
 			
 			if(b == 0 && (k - 1) * i <= l) {
 				b = 2 * i;
-				e = i + l;
+				e = i + l + 1; // Differs from the paper, may be a bug in the paper?
 				c = count;
 				Sp.push_back(SpElement{b, e, c});
 			}
@@ -148,7 +148,7 @@ private:
 		// Now 'it' contains the first Sp element with b > x.
 		if(it == Sp.begin()) return SpElement{0, 0, 0};
 		--it;
-		if(it->e </*=*/ x) return SpElement{0, 0, 0}; // TODO: this omission seems to fix tests but check.
+		if(it->e <= x) return SpElement{0, 0, 0};
 		return *it;
 	}
 	

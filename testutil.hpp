@@ -9,7 +9,7 @@ using namespace std;
 /// Return uniform random integer from range [a, b] u [b, a].
 template <typename T>
 T rand(T a, T b) {
-	static mt19937 rng;
+	static mt19937 rng(std::random_device{}());
 	
 	if(a > b) swap(a, b);
 	return uniform_int_distribution<T>(a, b)(rng);

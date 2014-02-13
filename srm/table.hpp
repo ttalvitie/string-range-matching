@@ -102,8 +102,8 @@ void computeLessThanMatchTableToIterator(
 
 /// Compute the same boolean vector as computeRangeMatchTable to random-access
 /// iterator range [b_begin, b_begin + n) where n is the length of string X. Uses
-/// std::copy for copying ranges. See computeRangeMatchTable for description
-/// of other parameters.
+/// std::copy for copying ranges. Current implementation uses |X| bits of extra
+/// space.
 template <
 	typename XI, typename YI, typename ZI,
 	typename BI,
@@ -115,21 +115,19 @@ void computeRangeMatchTableToIterator(
 	ZI z_begin, YI z_end,
 	BI b_begin
 ) {
-	// TODO: use constant extra space?
 	Idx n = (Idx)(x_end - x_begin);
 	
-	std::vector<char> a(n);
-	std::vector<char> b(n);
-	
-	computeLessThanMatchTableToIterator<XI, YI, std::vector<char>::iterator, Idx>(
-		x_begin, x_end, y_begin, y_end, a.begin()
+	computeLessThanMatchTableToIterator<XI, YI, BI, Idx>(
+		x_begin, x_end, y_begin, y_end, b_begin
 	);
-	computeLessThanMatchTableToIterator<XI, ZI, std::vector<char>::iterator, Idx>(
-		x_begin, x_end, z_begin, z_end, b.begin()
+	
+	std::vector<bool> tmp(n);
+	computeLessThanMatchTableToIterator<XI, ZI, std::vector<bool>::iterator, Idx>(
+		x_begin, x_end, z_begin, z_end, tmp.begin()
 	);
 	
 	for(Idx i = 0; i < n; ++i) {
-		*(b_begin + i) = a[i] != b[i];
+		*(b_begin + i) = (bool)*(b_begin + i) != tmp[i];
 	}
 }
 

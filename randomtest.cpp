@@ -9,6 +9,8 @@
 #include <vector>
 #include <random>
 
+// Tests on randomly generated strings compared to naive solutions.
+
 using namespace std;
 
 void randomTestLessThanMatch() {
@@ -23,16 +25,16 @@ void randomTestLessThanMatch() {
 		B.begin()
 	);
 	
-	for(size_t i = 0; i < X.size(); ++i) {
+	for(int i = 0; i < (int)X.size(); ++i) {
 		string Xi = X.substr(i);
 		if(B[i] != (Xi < Y)) fail();
 	}
 	
-	size_t count = 0;
+	int count = 0;
 	for(bool b : B) {
-		count += (size_t)b;
+		count += (int)b;
 	}
-	size_t cmpcount = srm::makeLessThanCounter(Y.begin(), Y.end())
+	int cmpcount = srm::makeLessThanCounter(Y.begin(), Y.end())
 		.count(X.begin(), X.end());
 	if(count != cmpcount) fail();
 }
@@ -42,6 +44,10 @@ void randomTestRangeMatch() {
 	string X = randstring(rand(0, choice(5, 15)), 'A', 'A' + a);
 	string Y = randstring(rand(0, choice(5, 15)), 'A', 'A' + a);
 	string Z = randstring(rand(0, choice(5, 15)), 'A', 'A' + a);
+	
+	X.push_back('Z');
+	Y.push_back('Z');
+	Z.push_back('Z');
 	
 	if(Y > Z) swap(Y, Z);
 	
@@ -53,16 +59,33 @@ void randomTestRangeMatch() {
 		B.begin()
 	);
 	
-	for(size_t i = 0; i < X.size(); ++i) {
+	vector<int> matches;
+	for(int i = 0; i < (int)X.size(); ++i) {
 		string Xi = X.substr(i);
 		if(B[i] != (Xi >= Y && Xi < Z)) fail();
+		if(B[i]) matches.push_back(i);
 	}
 	
-	size_t count = 0;
+	vector<int> cmpmatches;
+	srm::reportRangeMatches(
+		X.begin(), X.end(),
+		Y.begin(), Y.end(),
+		Z.begin(), Z.end(),
+		[&](int i) {
+			cmpmatches.push_back(i);
+		}
+	);
+	
+	sort(cmpmatches.begin(), cmpmatches.end());
+	
+	if(matches.size() != cmpmatches.size()) fail();
+	if(!equal(matches.begin(), matches.end(), cmpmatches.begin())) fail();
+	
+	int count = 0;
 	for(bool b : B) {
-		count += (size_t)b;
+		count += b;
 	}
-	size_t cmpcount = srm::makeRangeCounter(Y.begin(), Y.end(), Z.begin(), Z.end())
+	int cmpcount = srm::makeRangeCounter(Y.begin(), Y.end(), Z.begin(), Z.end())
 		.count(X.begin(), X.end());
 	if(count != cmpcount) fail();
 }
@@ -84,8 +107,8 @@ void randomTestStringPeriod() {
 		if(ok) break;
 	}
 	
-	size_t cmpperiod = srm::computeStringPeriod(X.begin(), X.end());
-	if((size_t)period != cmpperiod) fail();
+	int cmpperiod = srm::computeStringPeriod(X.begin(), X.end());
+	if(period != cmpperiod) fail();
 }
 
 void randomTestExactStringMatching() {
@@ -128,6 +151,7 @@ void randomTestExactStringMatching() {
 }
 
 void randomTestRestrictedRangeMatches() {
+	bool less_than = choice(true, false);
 	int a = rand(0, choice(3, 8, 20));
 	string X = randstring(rand(0, choice(5, 15, 30)), 'A', 'A' + a);
 	string Y;
@@ -145,7 +169,8 @@ void randomTestRestrictedRangeMatches() {
 	vector<int> matches;
 	for(int i = 0; i < (int)X.size(); ++i) {
 		string sub = X.substr(i);
-		if(sub >= Yp && sub < Y) {
+		if(sub.size() < Yp.size() || !equal(Yp.begin(), Yp.end(), sub.begin())) continue;
+		if(less_than == (sub < Y)) {
 			matches.push_back(i);
 		}
 	}
@@ -156,21 +181,28 @@ void randomTestRestrictedRangeMatches() {
 		Y.begin(), Y.end(), Y.begin() + r,
 		[&](int i) {
 			cmpmatches.push_back(i);
-		}
+		},
+		less_than
 	);
 	
 	sort(cmpmatches.begin(), cmpmatches.end());
+	
 	if(matches.size() != cmpmatches.size()) fail();
 	if(!equal(matches.begin(), matches.end(), cmpmatches.begin())) fail();
 }
 
 int main() {
+	cout << "Starting random testing. On failure, shows FAIL. Runs infinitely.\n";
+	int64_t count = 0;
+	int64_t report_interval = 10000;
 	while(true) {
 		randomTestLessThanMatch();
 		randomTestRangeMatch();
 		randomTestStringPeriod();
 		randomTestExactStringMatching();
 		randomTestRestrictedRangeMatches();
+		++count;
+		if(count % report_interval == 0) cout << "Run " << count << " cycles.\n";
 	}
 	
 	return 0;
