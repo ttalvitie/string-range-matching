@@ -116,7 +116,7 @@ int main() {
 				String Z(Zs, Zb);
 				
 				// We require that Y <= Z.
-				if(!lexicographical_compare(Y.begin(), Y.end(), Z.begin(), Z.end())) continue;
+				if(lexicographical_compare(Z.begin(), Z.end(), Y.begin(), Y.end())) continue;
 				
 				testRangeMatch(X, Y, Z);
 				
@@ -126,7 +126,7 @@ int main() {
 		}
 		}
 		
-		cout << (double)done / 6588669.76 << "% done.\n";
+		cout << (double)done / 6534730.03 << "% done.\n";
 	}
 	}
 	
