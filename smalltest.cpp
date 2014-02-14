@@ -20,6 +20,7 @@ struct String {
 		chars[2] = (bits >> 4) & 3;
 		chars[3] = (bits >> 6) & 3;
 		chars[4] = (bits >> 8) & 3;
+		chars[5] = (bits >> 10) & 3;
 	}
 	
 	const char* begin() const {
