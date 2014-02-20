@@ -166,7 +166,9 @@ int main(int argc, char* argv[]) {
 	while(((size_t)1 << log_n) < n) ++log_n;
 	
 	for(int64_t i = 0; i != limit; ++i) {
-		size_t s = rand((size_t)0, n / 2);
+		// Prefer small s so that we get interesting results from a large range.
+		size_t max_s = min((size_t)1 << rand((size_t)0, log_n), n / 2);
+		size_t s = rand((size_t)0, max_s);
 		
 		size_t a, b;
 		a = rand((size_t)0, suffix_array.size() - 1);

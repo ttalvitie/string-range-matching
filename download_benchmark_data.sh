@@ -1,7 +1,7 @@
 #/bin/bash
 
-# We use four megabyte prefixes of the texts.
-LENGTH=4194304
+# We use one megabyte prefixes of the texts.
+LENGTH=1048576
 
 curl http://pizzachili.dcc.uchile.cl/texts/code/sources.50MB.gz | zcat | head -c $LENGTH > data_texts_sources
 curl http://pizzachili.dcc.uchile.cl/texts/music/pitches.50MB.gz | zcat | head -c $LENGTH > data_texts_pitches
