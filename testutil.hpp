@@ -3,16 +3,25 @@
 #include <random>
 #include <algorithm>
 #include <iostream>
+#include <cmath>
 
 using namespace std;
+
+mt19937 rng(std::random_device{}());
 
 /// Return uniform random integer from range [a, b] u [b, a].
 template <typename T>
 T rand(T a, T b) {
-	static mt19937 rng(std::random_device{}());
-	
 	if(a > b) swap(a, b);
 	return uniform_int_distribution<T>(a, b)(rng);
+}
+
+/// Pick x from range [0, log(n + 1)) and return floor(exp(x)). Result is in
+/// range [1, n].
+int logrand(int n) {
+	assert(n > 0);
+	double x = uniform_real_distribution<double>(0, log(n + 1))(rng);
+	return max(1, min(n, (int)floor(exp(x))));
 }
 
 template <typename R>

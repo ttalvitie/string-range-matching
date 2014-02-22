@@ -12,7 +12,7 @@
 // Select two a substring length s in [0, n / 2] and two substrings Y and Z,
 // Y <= Z with lengths s at random. Runs different range matching algorithms
 // to finds suffices of text lexicographically in [Y, Z). Prints tuple
-//   s <lcp of the substrings> <time to count> <time to report> <time to table>.
+//   s <match count> <lcp of the substrings> <time to count> <time to report> <time to table>.
 // The number of iterations can be limited by a command line argument.
 
 /// Gets the current processor time in seconds. Linux specific, implement for
@@ -147,6 +147,7 @@ int main(int argc, char* argv[]) {
 	if(cin.bad() || !cin.eof()) fail("Reading input failed.");
 	
 	size_t n = text.size();
+	if(n < 16) fail("Too short text!");
 	
 	// Compute the suffix array. This is needed to facilitate finding suffices
 	// with high lcp.
@@ -166,23 +167,22 @@ int main(int argc, char* argv[]) {
 	while(((size_t)1 << log_n) < n) ++log_n;
 	
 	for(int64_t i = 0; i != limit; ++i) {
-		// Prefer small s so that we get interesting results from a large range.
-		size_t max_s = min((size_t)1 << rand((size_t)0, log_n), n / 2);
-		size_t s = rand((size_t)0, max_s);
+		size_t s = logrand(n / 2);
 		
 		size_t a, b;
-		a = rand((size_t)0, suffix_array.size() - 1);
+		a = rand((size_t)1, suffix_array.size() - 2);
 		if(choice(true, false)) {
 			// Select Z uniformly.
 			b = rand((size_t)0, suffix_array.size() - 1);
 		} else {
 			// Prefer Y and Z that are close together in the suffix array so that we get
 			// some cases with high LCP.
-			size_t radius = (size_t)1 << rand((size_t)0, log_n);
-			size_t lower = (a < radius) ? 0 : a - radius;
-			size_t upper = (a + radius >= suffix_array.size()) ? suffix_array.size() - 1 : a + radius;
 			
-			b = rand(lower, upper);
+			if(choice(true, false)) {
+				b = a - logrand(a);
+			} else {
+				b = a + logrand(suffix_array.size() - 1 - a);
+			}
 		}
 		
 		if(a > b) swap(a, b);
@@ -260,7 +260,7 @@ int main(int argc, char* argv[]) {
 			if(table_result[i] == true) fail("Report and table disagree about a match.");
 		}
 		
-		cout << s << " " << lcp << " " << count_time << " " << report_time << " " << table_time << "\n";
+		cout << s << " " << count_result << " " << lcp << " " << count_time << " " << report_time << " " << table_time << "\n";
 	}
 	
 	return 0;
