@@ -12,7 +12,14 @@
 // Select two a substring length s in [0, n / 2] and two substrings Y and Z,
 // Y <= Z with lengths s at random. Runs different range matching algorithms
 // to finds suffices of text lexicographically in [Y, Z). Prints tuple
-//   s <match count> <lcp of the substrings> <time to count> <time to report> <time to table>.
+//   - Substring length s
+//   - 1 if substrings were chosen with a distribution preferring string
+//     lexicographically close, otherwise 0.
+//   - Match count
+//   - LCP of substrings
+//   - Time to count
+//   - Time to report
+//   - Time to table
 // The number of iterations can be limited by a command line argument.
 
 /// Gets the current processor time in seconds. Linux specific, implement for
@@ -171,10 +178,8 @@ int main(int argc, char* argv[]) {
 		
 		size_t a, b;
 		a = rand((size_t)1, suffix_array.size() - 2);
-		if(choice(true, false)) {
-			// Select Z uniformly.
-			b = rand((size_t)0, suffix_array.size() - 1);
-		} else {
+		bool close = choice(true, false);
+		if(close) {
 			// Prefer Y and Z that are close together in the suffix array so that we get
 			// some cases with high LCP.
 			
@@ -183,6 +188,9 @@ int main(int argc, char* argv[]) {
 			} else {
 				b = a + logrand(suffix_array.size() - 1 - a);
 			}
+		} else {
+			// Select Z uniformly.
+			b = rand((size_t)0, suffix_array.size() - 1);
 		}
 		
 		if(a > b) swap(a, b);
@@ -260,7 +268,7 @@ int main(int argc, char* argv[]) {
 			if(table_result[i] == true) fail("Report and table disagree about a match.");
 		}
 		
-		cout << s << " " << count_result << " " << lcp << " " << count_time << " " << report_time << " " << table_time << "\n";
+		cout << s << " " << close << " " << count_result << " " << lcp << " " << count_time << " " << report_time << " " << table_time << "\n";
 	}
 	
 	return 0;
