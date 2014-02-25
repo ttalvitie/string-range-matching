@@ -13,8 +13,6 @@
 // Y <= Z with lengths s at random. Runs different range matching algorithms
 // to finds suffices of text lexicographically in [Y, Z). Prints tuple
 //   - Substring length s
-//   - 1 if substrings were chosen with a distribution preferring string
-//     lexicographically close, otherwise 0.
 //   - Match count
 //   - LCP of substrings
 //   - Time to count
@@ -154,55 +152,24 @@ int main(int argc, char* argv[]) {
 	if(cin.bad() || !cin.eof()) fail("Reading input failed.");
 	
 	size_t n = text.size();
-	if(n < 16) fail("Too short text!");
-	
-	// Compute the suffix array. This is needed to facilitate finding suffices
-	// with high lcp.
-	vector<int> suffix_array = constructSuffixArray(text);
-	
-	// Filter out suffices that start after n/2 so that we can easily find
-	// suffices that have at most n/2 size.
-	auto new_end = remove_if(
-		suffix_array.begin(), suffix_array.end(),
-		[n](int x) {
-			return (size_t)x > n / 2;
-		}
-	);
-	suffix_array.erase(new_end, suffix_array.end());
+	if(n == 0) fail("Empty text is not supported.");
 	
 	size_t log_n = 0;
 	while(((size_t)1 << log_n) < n) ++log_n;
 	
 	for(int64_t i = 0; i != limit; ++i) {
-		size_t s = logrand(n / 2);
+		size_t s = logrand(n);
 		
-		size_t a, b;
-		a = rand((size_t)1, suffix_array.size() - 2);
-		bool close = choice(true, false);
-		if(close) {
-			// Prefer Y and Z that are close together in the suffix array so that we get
-			// some cases with high LCP.
-			
-			if(choice(true, false)) {
-				b = a - logrand(a);
-			} else {
-				b = a + logrand(suffix_array.size() - 1 - a);
-			}
-		} else {
-			// Select Z uniformly.
-			b = rand((size_t)0, suffix_array.size() - 1);
-		}
+		size_t a = rand((size_t)0, n - s);
+		size_t b = rand((size_t)0, n - s);
 		
-		if(a > b) swap(a, b);
-		
-		auto y_begin = text.begin() + suffix_array[a];
+		auto y_begin = text.begin() + a;
 		auto y_end = y_begin + s;
-		auto z_begin = text.begin() + suffix_array[b];
+		auto z_begin = text.begin() + b;
 		auto z_end = z_begin + s;
 		
 		// Make sure that Y <= Z.
 		if(lexicographical_compare(z_begin, z_end, y_begin, y_end)) {
-			fail();
 			swap(a, b);
 			swap(y_begin, z_begin);
 			swap(y_end, z_end);
@@ -268,7 +235,7 @@ int main(int argc, char* argv[]) {
 			if(table_result[i] == true) fail("Report and table disagree about a match.");
 		}
 		
-		cout << s << " " << close << " " << count_result << " " << lcp << " " << count_time << " " << report_time << " " << table_time << "\n";
+		cout << s << " " << count_result << " " << lcp << " " << count_time << " " << report_time << " " << table_time << "\n";
 	}
 	
 	return 0;
